@@ -1,0 +1,5 @@
+package resourses;
+
+interface KeyHandler {
+
+}
