@@ -1,13 +1,13 @@
 package resourses;
 
-import java.util.Objects;
 import java.util.Scanner;
 
 public class SimpleCalculator extends Calculator {
     private enum Operation {
         EQUAL,
         ADD, SUBTRACT, MULT, DIVISION,
-        POW, SQRT
+        POW, SQRT,
+        ESC
     }
     public SimpleCalculator() {
         System.out.println("Selected Simple Calculator");
@@ -21,92 +21,81 @@ public class SimpleCalculator extends Calculator {
     protected void showAvOp() {
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
         System.out.println("The following mathematical operations are available to you:");
-        System.out.println("addition: +\nsubtraction: -\nmultiplication: *\ndivision: /");
+        System.out.println("addition: +\nsubtraction: -\nmultiplication: *\ndivision: /\n" +
+                            "sqrt: %\npow: ^");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
     }
 
 
     @Override
     protected void update() {
+        while (running) {
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-//        String num1_con = null, num2_con = null;
-//        double num1 = 0, num2 = 0;
-//        String operation = "=";
-//        boolean b_select_operation = false;
-//
-//        while (running) {
-//
-//            if (scanner.hasNextDouble()) {
-//                if (!b_select_operation) {
-//                    num1 = getNum();
-//                    num1_con = String.valueOf(num1);
-//                }
-//                else {
-//                    b_select_operation = false;
-//                }
-//            }
-//            else if (scanner.hasNext()) {
-//                operation = getOperation();
-//                if (Objects.equals(operation, "=")) {
-//                    //System.out.format("Result: \n%s %s %s = %.2f\n", num1_con, operation, num2_con, result);
-//                    clear();
-//                    num1 = 0; num1_con = null;
-//                    num2 = 0; num2_con = null;
-//                    continue;
-//                }
-//                num2 = num1; num2_con = num1_con;
-//                num1 = 0; num1_con = null;
-//                b_select_operation = true;
-//                continue;
-//            }
-//            else continue;
-//
-//            if (num2_con == null) result = solution(num1, operation);
-//            else result = solution(num2, num1, operation);
-//
-//
-//            if (!b_select_operation) {
-//                num1 = result; num1_con = String.valueOf(result);
-//                num2 = num1; num2_con = num1_con;
-//            }
-//            else {
-//                num2 = result; num2_con = String.valueOf(result);
-//            }
-//        }
-//        System.out.format("Result: %.2f\n", result);
+            System.out.print("Enter the first number: ");
+            double num1 = getNum();
+            double num1_sh = num1;
+
+            System.out.print("Enter the operation: ");
+            SimpleCalculator.Operation operation = getOperation();
+
+
+            if (operation.equals(Operation.POW) || operation.equals(Operation.SQRT)) {
+                double rank;
+                num1 = solution(num1, operation)[0];
+                rank = solution(num1, operation)[1];
+                System.out.format("Result: \n%f %s %f = %f\n", num1_sh, operation, rank, num1);
+            }
+            else {
+                System.out.print("Enter the second number: ");
+                double num2 = getNum();
+
+                num1 = solution(num1, num2, operation);
+                System.out.format("Result: \n%s %s %s = %s\n", num1_sh, operation, num2, num1);
+            }
+
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            clear();
+        }
     }
 
-    protected double solution(double num1, double num2, String operation) {
-        result = 0;
+    protected double solution(double num1, double num2, Operation operation) {
         switch (operation) {
-            case "+" -> result = num1 + num2;
-            case "-" -> result = num1 - num2;
-            case "*" -> result = num1 * num2;
-            case "/" -> {
+            case ADD -> num1 += num2;
+            case SUBTRACT -> num1 -= num2;
+            case MULT -> num1 *= num2;
+            case DIVISION -> {
                 if (num2 == 0) System.out.println("Error: Divided by zero\nTry again");
-                else result = num1 / num2;
+                else num1 /= num2;
             }
             case ESC -> running = false;
             default -> System.out.println("Error: Unsupported operation");
         }
-        return result;
+        return num1;
     }
 
-    private double solution(double num1, String operation) {
-        result = 0;
+    private double[] solution(double num1, Operation operation) {
+        double rank = 1;
         switch (operation) {
-            case "^" -> result = Math.pow(num1, 2);
-            case "%" -> result = Math.pow(num1, 0.5);
+            case POW -> {
+                System.out.print("Enter the degree`s rank: ");
+                rank = getNum();
+                num1 = Math.pow(num1, rank);
+            }
+            case SQRT -> {
+                System.out.print("Enter the root`s rank: ");
+                rank = 1 / getNum();
+                num1 = Math.pow(num1, rank);
+            }
             case ESC -> running = false;
             default -> clear();
         }
-        System.out.format("Result: \n%.2f %s = %.2f\n", num1, operation, result);
-        return result;
+        return new double[]{num1, rank};
     }
 
     @Override
     protected String getValue() {
-        return null;
+        return scanner.next();
     }
 
     private double getNum() {

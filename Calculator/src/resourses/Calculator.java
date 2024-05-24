@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 
 
-public abstract class Calculator implements KeyHandler {
+public abstract class Calculator {
     protected static final String ESC = "esc";
     protected static boolean running = true;
     protected double result;
@@ -16,7 +16,7 @@ public abstract class Calculator implements KeyHandler {
 
     protected abstract void showAvOp();
 
-    protected abstract void update();
+    protected abstract void update() throws Exception;
 
     protected abstract String getValue();
 

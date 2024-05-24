@@ -2,15 +2,15 @@ package resourses;
 
 import java.util.Scanner;
 
-class Hex extends NumSystem {
-    private int value;
+class Hex implements INumSystem {
+    protected int value;
 
-    public Hex(String val) {
-        super(val);
+    public Hex(String val) throws Exception {
+        setValue(val);
     }
 
     public Hex(int val) {
-        super(val);
+        setValue(val);
     }
 
     @Override
@@ -19,15 +19,17 @@ class Hex extends NumSystem {
     }
 
     @Override
-    public void setValue(String val) {
-        if (val.matches("[0-9A-F]+")) {
-            value = Integer.parseInt(val, 16);
+    public void setValue(String val) throws Exception {
+        if (!val.matches("[0-9A-F]+") || val.charAt(0) == '0') {
+            System.out.println("Wrong input");
+            throw new Exception("Wrong value input format");
         }
+        this.value = Integer.parseInt(val, 16);
     }
 
     @Override
     public void setValue(int val) {
-        value = val;
+        this.value = val;
     }
 
     private String toCurrentNumSystem(int val) {
@@ -40,15 +42,15 @@ class Hex extends NumSystem {
     }
 }
 
-class Dec extends NumSystem {
-    private int value;
+class Dec implements INumSystem {
+    protected int value;
 
-    public Dec(String val) {
-        super(val);
+    public Dec(String val) throws Exception {
+        setValue(val);
     }
 
     public Dec(int val) {
-        super(val);
+        setValue(val);
     }
 
     @Override
@@ -57,19 +59,21 @@ class Dec extends NumSystem {
     }
 
     @Override
-    public void setValue(String val) {
-        if (val.matches("\\d+")) {
-            value = Integer.parseInt(val);
+    public void setValue(String val) throws Exception {
+        if (!val.matches("\\d+") || val.charAt(0) == '0') {
+            System.out.println("Wrong input");
+            throw new Exception("Wrong value input format");
         }
+        this.value = Integer.parseInt(val);
     }
 
     @Override
     public void setValue(int val) {
-        value = val;
+        this.value = val;
     }
 
     private String toCurrentNumSystem(int val) {
-        return Integer.toString(val);
+        return String.valueOf(val);
     }
 
     @Override
@@ -78,15 +82,15 @@ class Dec extends NumSystem {
     }
 }
 
-class Oct extends NumSystem {
-    private int value;
+class Oct implements INumSystem {
+    protected int value;
 
-    public Oct(String val) {
-        super(val);
+    public Oct(String val) throws Exception {
+        setValue(val);
     }
 
     public Oct(int val) {
-        super(val);
+        setValue(val);
     }
 
     @Override
@@ -95,15 +99,17 @@ class Oct extends NumSystem {
     }
 
     @Override
-    public void setValue(String val) {
-        if (val.matches("[0-7]+")) {
-            value = Integer.parseInt(val);
+    public void setValue(String val) throws Exception {
+        if (!val.matches("[0-7]+") || val.charAt(0) == '0') {
+            System.out.println("Wrong input");
+            throw new Exception("Wrong value input format");
         }
+        this.value = Integer.parseInt(val, 8);
     }
 
     @Override
     public void setValue(int val) {
-        value = val;
+        this.value = val;
     }
 
     private String toCurrentNumSystem(int val) {
@@ -116,15 +122,15 @@ class Oct extends NumSystem {
     }
 }
 
-class Bin extends NumSystem {
+class Bin implements INumSystem {
     private int value;
 
-    public Bin(String val) {
-        super(val);
+    public Bin(String val) throws Exception {
+        setValue(val);
     }
 
     public Bin(int val) {
-        super(val);
+        setValue(val);
     }
 
     @Override
@@ -133,15 +139,17 @@ class Bin extends NumSystem {
     }
 
     @Override
-    public void setValue(String val) {
-        if (val.matches("[0-1]+")) {
-            value = Integer.parseInt(val);
+    public void setValue(String val) throws Exception {
+        if (!val.matches("[01]+")) {
+            System.out.println("Wrong input");
+            throw new Exception("Wrong value input format");
         }
+        this.value = Integer.parseInt(val, 2);
     }
 
     @Override
     public void setValue(int val) {
-        value = val;
+        this.value = val;
     }
 
     private String toCurrentNumSystem(int val) {
@@ -167,7 +175,7 @@ public class ProgrammerCalculator extends Calculator {
     private enum NumeralSystem {
         HEX, DEC, OCT, BIN
     }
-    public ProgrammerCalculator() {
+    public ProgrammerCalculator() throws Exception {
         System.out.println("Selected Programmer Calculator");
         showAvOp();
 
@@ -179,8 +187,16 @@ public class ProgrammerCalculator extends Calculator {
     protected void showAvOp() {
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
         System.out.println("The following programming operations are available to you:");
-        System.out.println("addition: +\nsubtraction: -\nmultiplication: *\ndivision: /\n" +
-                "\nremainder: mod\nbitwise exclusion: xor\nbitwise and: and\nbitwise or: or");
+        System.out.println("""
+                addition: +
+                subtraction: -
+                multiplication: *
+                division: /
+
+                remainder: mod
+                bitwise exclusion: xor
+                bitwise and: and
+                bitwise or: or""");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
     }
 
@@ -192,32 +208,44 @@ public class ProgrammerCalculator extends Calculator {
     }
 
     @Override
-    protected void update() {
+    protected void update() throws Exception {
+        changeNumSys();
         while (running) {
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
             System.out.print("Enter the first number: ");
-            NumSystem num1 = getNum();
+            INumSystem num1 = getNum();
+            String num1_sh = num1.toString();
 
-            System.out.print("Enter the operation: ");
-            Operation operation = getOperation();
+            while(true) {
+                System.out.print("Enter the operation: ");
+                Operation operation = getOperation();
 
-            System.out.print("Enter the second number: ");
-            NumSystem num2 = getNum();
+                if (operation == Operation.EQUAL) break;
 
-            int result = solution(num1, num2, operation);
+                System.out.print("Enter the second number: ");
+                INumSystem num2 = getNum();
 
-            System.out.format("Result: \n%s %s %s = %s\n", num1, operation, num2, result);
+                solution(num1, num2, operation);
+                System.out.format("Result: \n%s %s %s = %s\n", num1_sh, operation, num2, num1);
+                num1_sh = num1.toString();
+            }
 
+            System.out.format("FINAL Result: %s\n", num1_sh);
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-            System.out.println("Change the numeral system?");
-            if (getValue().contains("y")) numeralSys = changeNumeralSystem();
+            changeNumSys();
             clear();
         }
     }
 
-    protected int solution(NumSystem num1, NumSystem num2, Operation operation) {
+    private void changeNumSys() {
+        System.out.printf("Change the numeral system? Current is %s\n", numeralSys);
+        if (getValue().contains("y")) numeralSys = changeNumeralSystem();
+        else System.out.println("So continue...");
+    }
+
+    protected void solution(INumSystem num1, INumSystem num2, Operation operation) throws Exception {
         switch (operation) {
             case ADD -> num1.AddNumSys(num2);
             case SUBTRACT -> num1.SubtractNumSys(num2);
@@ -228,12 +256,11 @@ public class ProgrammerCalculator extends Calculator {
             }
             case MOD -> num1.ModNumSys(num2);
             case XOR -> num1.XorNumSys(num2);
-            case AND -> num1.AddNumSys(num2);
+            case AND -> num1.AndNumSys(num2);
             case OR -> num1.OrNumSys(num2);
             case ESC -> running = false;
             default -> System.out.println("Error: Unsupported operation");
-        }
-        return num1.getValue();
+        };
     }
 
     private NumeralSystem getNumeralSystem() {
@@ -261,13 +288,19 @@ public class ProgrammerCalculator extends Calculator {
         return getNumeralSystem();
     }
 
-    protected NumSystem getNum() {
-        return switch (numeralSys) {
-            case BIN -> new Bin(getValue());
-            case OCT -> new Oct(getValue());
-            case DEC -> new Dec(getValue());
-            case HEX -> new Hex(getValue());
-        };
+    protected INumSystem getNum() throws Exception {
+        try {
+            String input = getValue();
+            return switch (numeralSys) {
+                case BIN -> new Bin(input);
+                case OCT -> new Oct(input);
+                case DEC -> new Dec(input);
+                case HEX -> new Hex(input);
+            };
+        } catch (Exception ex) {
+            System.out.println("Enter wrong value! Try again...");
+            return getNum();
+        }
     }
 
     protected Operation getOperation() {

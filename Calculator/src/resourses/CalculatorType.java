@@ -9,10 +9,10 @@ public enum CalculatorType {
     },
     PROGRAMMER {
         @Override
-        public Calculator getCalculator() {
+        public Calculator getCalculator() throws Exception {
             return new ProgrammerCalculator();
         }
     };
 
-    public abstract Calculator getCalculator();
+    public abstract Calculator getCalculator() throws Exception;
 }
